@@ -22,7 +22,7 @@ def same_padding(kernel_size):
 # PyTorch port of
 class MaskedConvolution2D(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, 
-            *args, mask='B', vertical=False, mask_mode="noblind", **kwargs):
+            *args, **kwargs):
         if "padding" not in kwargs:
             assert "stride" not in kwargs
             kwargs["padding"] = same_padding(kernel_size)
@@ -35,6 +35,9 @@ class MaskedConvolution2D(nn.Conv2d):
         Cout, Cin, kh, kw = self.weight.size()
         pre_mask = np.ones_like(self.weight.data.cpu().numpy()).astype(np.float32)
         yc, xc = kh // 2, kw // 2
+        mask = kwargs.pop('mask', 'B')
+        vertical = kwargs.pop('vertical', False)
+        mask_mode = kwargs.pop('mask_mode', 'noblind')
 
         assert mask_mode in {"noblind", "turukin", "fig1-van-den-oord"}
         if mask_mode == "noblind":
@@ -108,11 +111,11 @@ class CroppedConvolution(nn.Conv2d):
         if "padding" not in kwargs:
             assert "stride" not in kwargs
             kwargs["padding"] = same_padding(kernel_size)
-        super().__init__(in_channels, out_channels, kernel_size,
+        super(CroppedConvolution, self).__init__(in_channels, out_channels, kernel_size,
                 *args, **kwargs)
 
     def __call__(self, x):
-        ret = super().__call__(x)
+        ret = super(CroppedConvolution, self).__call__(x)
         _, _, kh, kw = self.weight.size()
         pad_h, pad_w = self.padding
         h_crop = -(kh + 1) if pad_h == kh else None
@@ -125,7 +128,7 @@ class PixelCNNGatedLayer(nn.Module):
             conditional_image_channels=None, residual_vertical=False,
             residual_horizontal=True, skips=False, gated=True,
             relu_out=False, horizontal_2d_convs=False, mask_mode="noblind"):
-        super().__init__()
+        super(PixelCNNGatedLayer, self).__init__()
         self.primary = primary
         if primary:
             assert mask == 'A'
@@ -234,7 +237,7 @@ class PixelCNNGatedLayer(nn.Module):
 
 class PixelCNNGatedStack(nn.Module):
     def __init__(self, *args):
-        super().__init__()
+        super(PixelCNNGatedStack, self).__init__()
         layers = list(args)
         for i, layer in enumerate(layers):
             assert isinstance(layer, PixelCNNGatedLayer)

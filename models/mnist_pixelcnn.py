@@ -5,7 +5,7 @@ from .components.pixelcnn import *
 
 class MNIST_PixelCNNNew(PixelCNN):
     def __init__(self, layers=5, levels=8, conditional=False, **kwargs):
-        super().__init__()
+        super(MNIST_PixelCNNNew, self).__init__()
         self.conditional = conditional
         if conditional:
             self.embed = nn.Embedding(10, 32)

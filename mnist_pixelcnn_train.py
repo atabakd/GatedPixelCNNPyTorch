@@ -1,9 +1,5 @@
-import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 from data.mnist_dataset import MnistDataset
-from data.data_affine import RandomAffineTransform
 from models.mnist_pixelcnn import *
 from models.components.shared import *
 from train_utils import *
